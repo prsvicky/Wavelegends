@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101a2b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<title>WAVE LEGENDS</title>
+<style>
+:root{color-scheme:dark;--bg:#101a2b;--panel:#1b2b43;--line:#354968;--gold:#f2c15d;--blue:#72aaff;--purple:#bd8cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#243a57,#0c1422 65%);color:#f4f5fa;font:15px system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);max-width:760px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 2px}.brand{font-size:23px;font-weight:950;letter-spacing:1px}.sub{font-size:10px;letter-spacing:3px;color:#a8bad4}.currency{font-weight:800;text-align:right;line-height:1.8}.gold{color:var(--gold)}.gem{color:var(--purple)}
+.panel{background:linear-gradient(145deg,#1b2c45,#152238);border:1px solid var(--line);border-radius:15px;padding:13px;margin:10px 0;box-shadow:0 8px 24px #0003}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#0e1a2b;border-radius:10px;text-align:center;padding:9px;font-size:11px;color:#afc0d6}.stat b{display:block;font-size:20px;color:white;margin-top:3px}
+.bar{height:9px;background:#0c1422;border-radius:9px;overflow:hidden;margin:5px 0 10px}.fill{height:100%;width:100%;background:#36c88b;transition:width .2s}.xp{background:#6ca8ff}
+canvas{width:100%;display:block;border-radius:12px;background:#14263a;touch-action:none}.arenaWrap{position:relative}.arenaTag{position:absolute;top:9px;left:10px;font-size:11px;font-weight:800;text-shadow:0 2px 4px #000}
+button{background:#233a59;color:#f4f5fa;border:1px solid #476184;border-radius:11px;padding:11px;font-weight:750;font-size:13px;cursor:pointer}button:active{transform:scale(.97)}button.primary{background:linear-gradient(120deg,#3b69a6,#654c9d);border:0}button:disabled{opacity:.4}
+.controls{display:grid;grid-template-columns:repeat(3,52px);gap:5px;justify-content:center}.controls button{height:46px;font-size:20px;padding:0;touch-action:none}.controlRow{display:flex;gap:15px;align-items:center}.controlHint{font-size:12px;color:#9fb1ca;flex:1}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.nav button{padding:10px 3px;font-size:11px}
+#panelView{min-height:90px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.card{min-height:145px;text-align:left;display:flex;flex-direction:column;gap:7px;padding:10px}.card .emoji{font-size:25px}.rarity{font-size:10px;font-weight:900;text-transform:uppercase}.common{border-color:#929eac}.rare{border-color:#368ef3}.epic{border-color:#b16df4}.legendary{border-color:#edb53d;box-shadow:inset 0 0 14px #edb53d22}
+.hidden{display:none!important}.muted{color:#9fb1ca}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.small{font-size:12px}.heroItem,.mission{padding:10px 0;border-bottom:1px solid #354968}.heroItem:last-child,.mission:last-child{border:0}.toast{color:#f4d58c;font-size:13px;min-height:20px;text-align:center}
+@media(max-width:420px){.cards{grid-template-columns:1fr}.card{min-height:0}.brand{font-size:20px}}
+</style></head>
+<body>
+<header><div><div class="sub">DARK FANTASY SURVIVAL RPG</div><div class="brand">⚔️ WAVE LEGENDS</div></div><div class="currency"><div class="gold">🪙 <span id="coins">0</span></div><div class="gem">💎 <span id="gems">0</span></div></div></header>
+<section class="panel">
+ <div class="row"><b id="heroName">🛡️ Chevalier</b><span class="muted small" id="heroClass">Guerrier</span></div>
+ <div class="row small"><span>❤️ Points de vie</span><b id="hpText">100 / 100</b></div><div class="bar"><div id="hpBar" class="fill"></div></div>
+ <div class="row small"><span>⭐ Expérience</span><b id="xpText">0 / 30</b></div><div class="bar"><div id="xpBar" class="fill xp" style="width:0"></div></div>
+ <div class="stats"><div class="stat">VAGUE<b id="wave">1</b></div><div class="stat">NIVEAU<b id="level">1</b></div><div class="stat">ÉLIMINATIONS<b id="kills">0</b></div></div>
+ <div class="stats" style="margin-top:8px"><div class="stat">⚔️ DÉGÂTS<b id="damage">12</b></div><div class="stat">🛡️ DÉFENSE<b id="defense">2</b></div><div class="stat">💨 VITESSE<b id="speed">3</b></div></div>
+</section>
+<div class="arenaWrap"><canvas id="arena" width="600" height="390"></canvas><div class="arenaTag" id="arenaTag">🌲 FORÊT ENCHANTÉE</div></div>
+<div class="panel"><div class="row"><b>🎮 Déplacements</b><span class="muted small">Attaques automatiques</span></div><div class="controlRow"><div class="controls"><span></span><button data-dir="up">▲</button><span></span><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div><div class="controlHint">Déplace ton héros avec les flèches. Il attaque automatiquement le monstre le plus proche.</div></div><div class="toast" id="message">Prêt à commencer ton aventure ?</div><button class="primary" id="start" style="width:100%;margin-top:8px">▶ COMMENCER / REPRENDRE</button></div>
+<section class="panel"><b>✨ Pouvoirs équipés</b><div id="powers" class="small muted" style="margin-top:8px">Aucun pouvoir pour le moment.</div></section>
+<nav class="nav"><button data-tab="missions">📜 Missions</button><button data-tab="shop">🛍️ Boutique</button><button data-tab="heroes">🦸 Héros</button><button data-tab="collection">🃏 Cartes</button></nav>
+<section class="panel hidden" id="panelView"></section>
+<section class="panel hidden" id="choicePanel"><b id="choiceTitle">✨ Choisis une carte</b><p class="muted small">Choisis une seule amélioration parmi les trois propositions.</p><div class="cards" id="cardChoices"></div></section>
+<footer class="muted small" style="text-align:center;padding:12px">Prototype mobile • Sauvegarde locale automatique • Aucun achat réel</footer>
+<script>
+(()=> {
+const $=id=>document.getElementById(id),canvas=$('arena'),ctx=canvas.getContext('2d');
+const heroes=[{name:'Chevalier',cls:'Guerrier',icon:'🛡️',hp:110,dmg:13,def:3,cost:0},{name:'Mage',cls:'Arcaniste',icon:'🧙',hp:78,dmg:18,def:0,cost:180},{name:'Assassin',cls:'Ombre',icon:'🥷',hp:90,dmg:16,def:1,cost:300},{name:'Paladin',cls:'Protecteur',icon:'⚔️',hp:140,dmg:12,def:6,cost:500}];
+const pool=[
+['Lame affûtée','+5 dégâts','⚔️','Commun','damage',5],['Armure renforcée','+3 défense','🛡️','Commun','defense',3],['Vitalité','+25 PV maximum','❤️','Commun','hp',25],['Pas rapide','+0,5 vitesse','💨','Commun','speed',.5],
+['Lame du chasseur','+12 dégâts','🗡️','Rare','damage',12],['Bouclier runique','+8 défense et +15 PV','🔰','Rare','armor',8],['Siphon vital','Récupère 2 PV par élimination','💚','Rare','heal',2],
+['Foudre en chaîne','+30 dégâts','⚡','Épique','damage',30],['Cœur du dragon','+70 PV maximum','🐉','Épique','hp',70],
+['Lame du néant','+65 dégâts','🌌','Légendaire','damage',65],['Armure immortelle','+18 défense','👑','Légendaire','armor',18],['Renaissance','Restaure toute ta vie','✨','Légendaire','full',1]
+];
+let state={coins:0,gems:0,wave:1,kills:0,level:1,xp:0,damage:13,defense:3,maxHp:110,hp:110,speed:3,hero:0,unlocked:[0],powers:[],collection:[],missions:{kills:0,waves:0,bosses:0},running:false,weaponLevel:1,armorLevel:0};
+try{const saved=JSON.parse(localStorage.getItem('waveLegendsSave'));if(saved)state={...state,...saved};}catch(e){}
+let player={x:300,y:195},enemies=[],shots=[],keys={},touch={},frame=0,attackTimer=0,paused=true,gameOver=false,boss=false;
+function save(){localStorage.setItem('waveLegendsSave',JSON.stringify(state))}
+function update(){
+$('coins').textContent=state.coins;$('gems').textContent=state.gems;$('wave').textContent=state.wave;$('level').textContent=state.level;$('kills').textContent=state.kills;
+let h=heroes[state.hero];$('heroName').textContent=h.icon+' '+h.name;$('heroClass').textContent=h.cls;
+$('hpText').textContent=Math.ceil(state.hp)+' / '+state.maxHp;$('hpBar').style.width=Math.max(0,state.hp/state.maxHp*100)+'%';$('xpText').textContent=state.xp+' / '+state.level*30;$('xpBar').style.width=state.xp/(state.level*30)*100+'%';
+$('damage').textContent=state.damage;$('defense').textContent=state.defense;$('speed').textContent=state.speed.toFixed(1);
+$('powers').textContent=state.powers.length?state.powers.map(x=>x.icon+' '+x.name).join(' • '):'Aucun pouvoir pour le moment.';save();
+}
+function say(t){$('message').textContent=t}
+function spawn(){
+enemies=[];shots=[];boss=state.wave%10===0;let n=boss?1:4+state.wave*2;
+for(let i=0;i<n;i++){let a=Math.random()*Math.PI*2,r=225+Math.random()*65,max=boss?250+state.wave*38:25+state.wave*8;enemies.push({x:300+Math.cos(a)*r,y:195+Math.sin(a)*r,hp:max,max,spd:boss?.72+state.wave*.012:.72+state.wave*.022,dmg:boss?19+state.wave:5+state.wave*.7,size:boss?29:12,boss,hit:0})}
+$('arenaTag').textContent=boss?'👹 BOSS — VAGUE '+state.wave:'🌲 FORÊT ENCHANTÉE — VAGUE '+state.wave; say(boss?'Un boss apparaît !':'Élimine tous les monstres !');update();
+}
+function rollRarity(){let luck=Math.min(20,(state.weaponLevel+state.armorLevel)*1.6),r=Math.random()*100;return r<1+luck*.3?'Légendaire':r<7+luck*.7?'Épique':r<27+luck?'Rare':'Commun'}
+function showCards(){
+paused=true;$('choicePanel').classList.remove('hidden');$('choiceTitle').textContent=boss?'🏆 Récompense du boss !':'✨ Choisis ton pouvoir';let arr=[];
+while(arr.length<3){let rarity=rollRarity(),p=pool.filter(x=>x[3]===rarity),c=p[Math.floor(Math.random()*p.length)];if(!arr.some(x=>x[0]===c[0]))arr.push(c)}
+if(boss)arr[0]=['Trésor du boss','+100 pièces et +40 gemmes','💎','Légendaire','boss',1];
+$('cardChoices').innerHTML='';arr.forEach(c=>{let b=document.createElement('button');b.className='card '+c[3].toLowerCase();b.innerHTML=`<span class="emoji">${c[2]}</span><b>${c[0]}</b><span class="rarity">${c[3]}</span><span class="small muted">${c[1]}</span>`;b.onclick=()=>{apply(c);$('choicePanel').classList.add('hidden');state.wave++;state.missions.waves++;if(state.wave%5===0)state.coins+=25;spawn();paused=false;state.running=true;update()};$('cardChoices').appendChild(b)});
+}
+function apply(c){let [name,desc,icon,rarity,type,val]=c;
+if(type==='damage'){state.damage+=val;state.weaponLevel++}if(type==='defense'){state.defense+=val;state.armorLevel++}if(type==='hp'){state.maxHp+=val;state.hp=Math.min(state.maxHp,state.hp+val)}if(type==='speed')state.speed+=val;if(type==='armor'){state.defense+=val;state.maxHp+=15;state.hp=Math.min(state.maxHp,state.hp+15);state.armorLevel++}if(type==='heal')state.powers.push({name,icon,type,val});if(type==='full')state.hp=state.maxHp;if(type==='boss'){state.coins+=100;state.gems+=40;state.damage+=8}
+if(!state.powers.some(p=>p.name===name))state.powers.push({name,icon,type,val});state.collection.push(name);state.coins+=8;say('Carte obtenue : '+name);update()}
+function hit(e,d){e.hp-=d;e.hit=5;if(e.hp<=0){enemies=enemies.filter(x=>x!==e);state.kills++;state.missions.kills++;state.coins+=e.boss?100:3+Math.floor(state.wave/2);state.xp+=e.boss?55:8;let heal=state.powers.find(p=>p.type==='heal');if(heal)state.hp=Math.min(state.maxHp,state.hp+heal.val);if(e.boss){state.missions.bosses++;state.gems+=10;say('Boss vaincu ! +100 pièces et +10 gemmes.')}while(state.xp>=state.level*30){state.xp-=state.level*30;state.level++;state.maxHp+=5;state.hp=Math.min(state.maxHp,state.hp+15);state.damage+=2}update()}}
+function end(){paused=true;gameOver=true;state.running=false;say('💀 Fin de partie — vague '+state.wave+'. Appuie sur recommencer.');$('start').textContent='↻ RECOMMENCER';update()}
+function resetRun(){state.wave=1;state.kills=0;state.level=1;state.xp=0;state.damage=heroes[state.hero].dmg;state.defense=heroes[state.hero].def;state.maxHp=heroes[state.hero].hp;state.hp=state.maxHp;state.speed=3;state.powers=[];state.weaponLevel=1;state.armorLevel=0;player={x:300,y:195};gameOver=false;state.running=true;paused=false;$('start').textContent='⏸ PAUSE';spawn();update()}
+function tick(){
+if(paused||!state.running)return;frame++;attackTimer++;let dx=(keys.right||touch.right?1:0)-(keys.left||touch.left?1:0),dy=(keys.down||touch.down?1:0)-(keys.up||touch.up?1:0),l=Math.hypot(dx,dy)||1;player.x=Math.max(15,Math.min(585,player.x+dx/l*state.speed));player.y=Math.max(15,Math.min(375,player.y+dy/l*state.speed));
+let target=enemies.reduce((a,e)=>!a||Math.hypot(e.x-player.x,e.y-player.y)<Math.hypot(a.x-player.x,a.y-player.y)?e:a,null);
+if(target&&attackTimer>38){attackTimer=0;if(Math.hypot(target.x-player.x,target.y-player.y)<260)shots.push({x:player.x,y:player.y,target,life:40,d:state.damage})}
+shots.forEach(s=>{if(!enemies.includes(s.target)){shots=shots.filter(x=>x!==s);return}let a=Math.atan2(s.target.y-s.y,s.target.x-s.x);s.x+=Math.cos(a)*9;s.y+=Math.sin(a)*9;s.life--;if(Math.hypot(s.x-s.target.x,s.y-s.target.y)<s.target.size+5){hit(s.target,s.d);shots=shots.filter(x=>x!==s)}})
+enemies.forEach(e=>{let a=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(a)*e.spd;e.y+=Math.sin(a)*e.spd;if(e.hit)e.hit--;if(Math.hypot(player.x-e.x,player.y-e.y)<e.size+14&&frame%35===0){state.hp-=Math.max(1,e.dmg-state.defense);if(state.hp<=0){state.hp=0;end()}}});
+update();draw();if(enemies.length===0&&!paused)showCards();
+}
+function draw(){ctx.clearRect(0,0,600,390);ctx.fillStyle='#14263a';ctx.fillRect(0,0,600,390);ctx.strokeStyle='#263d4a';for(let x=0;x<600;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,390);ctx.stroke()}for(let y=0;y<390;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(600,y);ctx.stroke()}
+for(let i=0;i<22;i++){let x=(i*137+30)%600,y=(i*83+15)%390;ctx.fillStyle='#244a3c';ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill()}
+enemies.forEach(e=>{ctx.fillStyle=e.hit?'#fff':e.boss?'#a63243':'#b66b42';ctx.beginPath();ctx.arc(e.x,e.y,e.size,0,7);ctx.fill();ctx.font=e.boss?'23px sans-serif':'16px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText(e.boss?'👹':'👾',e.x,e.y+6);ctx.fillStyle='#311';ctx.fillRect(e.x-e.size,e.y-e.size-9,e.size*2,4);ctx.fillStyle='#4c8';ctx.fillRect(e.x-e.size,e.y-e.size-9,e.size*2*Math.max(0,e.hp/e.max),4)});
+shots.forEach(s=>{ctx.fillStyle='#f9d66c';ctx.beginPath();ctx.arc(s.x,s.y,5,0,7);ctx.fill()});ctx.fillStyle='#e4c77e';ctx.beginPath();ctx.arc(player.x,player.y,15,0,7);ctx.fill();ctx.fillStyle='#416cb1';ctx.beginPath();ctx.arc(player.x,player.y,12,0,7);ctx.fill();ctx.font='19px sans-serif';ctx.fillStyle='#fff';ctx.fillText(heroes[state.hero].icon,player.x,player.y+7)}
+function tab(name){let p=$('panelView');p.classList.remove('hidden');if(name==='missions'){let m=state.missions;p.innerHTML='<b>📜 Missions</b><div class="mission">⚔️ Élimine 20 monstres — '+Math.min(20,m.kills)+'/20 <span class="gold">(+50 pièces)</span> <button data-claim="kills">Récupérer</button></div><div class="mission">🌊 Termine 5 vagues — '+Math.min(5,m.waves)+'/5 <span class="gold">(+100 pièces)</span> <button data-claim="waves">Récupérer</button></div><div class="mission">👹 Bats un boss — '+m.bosses+'/1 <span class="gem">(+15 gemmes)</span> <button data-claim="bosses">Récupérer</button></div>';p.querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{let k=b.dataset.claim,goal={kills:20,waves:5,bosses:1}[k],id='claim_'+k;if((m[k]||0)>=goal&&!state[id]){state[id]=true;if(k==='bosses')state.gems+=15;else state.coins+=k==='kills'?50:100;update();tab('missions')}else b.textContent=state[id]?'Déjà récupérée':'Pas encore terminé'})}
+if(name==='shop'){p.innerHTML='<b>🛍️ Boutique des apparences</b><div class="mission">🖤 Skin Chevalier noir — 120 pièces <button data-buy="120">Acheter</button></div><div class="mission">🌠 Skin Mage astral — 200 gemmes <button data-gem="200">Acheter</button></div><div class="mission">✨ Pack démo +50 gemmes <button id="free">Obtenir</button></div><p class="muted small">La boutique est simulée dans cette version : aucun paiement réel.</p>';p.querySelector('[data-buy]').onclick=()=>buy(120,'Skin Chevalier noir','coins');p.querySelector('[data-gem]').onclick=()=>buy(200,'Skin Mage astral','gems');p.querySelector('#free').onclick=()=>{state.gems+=50;update();tab('shop')}}
+if(name==='heroes'){p.innerHTML='<b>🦸 Héros à débloquer</b>'+heroes.map((h,i)=>'<div class="heroItem row"><div>'+h.icon+' <b>'+h.name+'</b><div class="muted small">'+h.cls+' • ❤️ '+h.hp+' • ⚔️ '+h.dmg+'</div></div><button data-hero="'+i+'">'+(state.unlocked.includes(i)?(state.hero===i?'Actif ✓':'Choisir'):'🪙 '+h.cost)+'</button></div>').join('');p.querySelectorAll('[data-hero]').forEach(b=>b.onclick=()=>{let i=+b.dataset.hero,h=heroes[i];if(!state.unlocked.includes(i)){if(state.coins<h.cost){b.textContent='Pièces insuffisantes';return}state.coins-=h.cost;state.unlocked.push(i)}state.hero=i;state.damage=h.dmg;state.defense=h.def;state.maxHp=h.hp;state.hp=h.hp;update();tab('heroes')})}
+if(name==='collection'){p.innerHTML='<b>🃏 Album de cartes</b><p class="muted small">Cartes découvertes : '+new Set(state.collection).size+'/'+pool.length+'</p><div class="cards">'+pool.map(c=>'<div class="stat"><div style="font-size:23px">'+(state.collection.includes(c[0])?c[2]:'❔')+'</div><b>'+(state.collection.includes(c[0])?c[0]:'Carte inconnue')+'</b><div class="rarity">'+(state.collection.includes(c[0])?c[3]:'À découvrir')+'</div></div>').join('')+'</div>'}
+}
+function buy(cost,item,currency){if(state[currency]>=cost){state[currency]-=cost;state.collection.push(item);update();tab('shop')}else alert('Pas assez de '+(currency==='coins'?'pièces':'gemmes')+' !')}
+$('start').onclick=()=>{if(gameOver||!state.running){resetRun()}else{paused=!paused;$('start').textContent=paused?'▶ REPRENDRE':'⏸ PAUSE';say(paused?'Partie en pause.':'À l’attaque !')}};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.querySelectorAll('[data-dir]').forEach(b=>{let d=b.dataset.dir;b.addEventListener('pointerdown',e=>{e.preventDefault();touch[d]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>touch[d]=false))});
+let map={arrowup:'up',z:'up',arrowdown:'down',s:'down',arrowleft:'left',q:'left',arrowright:'right',d:'right'};document.addEventListener('keydown',e=>{if(map[e.key.toLowerCase()]){keys[map[e.key.toLowerCase()]]=true;e.preventDefault()}});document.addEventListener('keyup',e=>{if(map[e.key.toLowerCase()])keys[map[e.key.toLowerCase()]]=false});
+draw();update();let last=0;function loop(t){if(t-last>30){tick();last=t}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+})();
+</script></body></html>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>

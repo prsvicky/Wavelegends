@@ -1,0 +1,19 @@
+WAVE LEGENDS — PWA mobile
+
+Fichiers :
+- index.html : jeu
+- manifest.webmanifest : configuration installable
+- sw.js : fonctionnement hors ligne après premier chargement
+- icon-192.png / icon-512.png : icônes
+
+IMPORTANT : pour installer sur iPhone, les fichiers doivent être publiés sur une adresse HTTPS.
+Étapes simples avec GitHub Pages :
+1. Créer un compte GitHub si nécessaire.
+2. Créer un dépôt public nommé wave-legends.
+3. Ajouter les 4 fichiers du dossier à la racine du dépôt.
+4. Dans Settings > Pages, choisir Deploy from a branch, branch main, folder /(root), puis Save.
+5. Ouvrir l'adresse HTTPS fournie dans Safari sur l'iPhone.
+6. Bouton Partager > Ajouter à l'écran d'accueil > Ajouter.
+
+La sauvegarde de progression est stockée localement dans le navigateur de l'appareil.
+La boutique de gemmes est une simulation, aucun paiement n'est intégré.
